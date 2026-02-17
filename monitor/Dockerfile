@@ -5,15 +5,16 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Copiar archivos de requerimientos si aplica
-# COPY requirements.txt .
+COPY requirements.txt .
 
 # Instalar dependencias (descomente si usa requirements.txt)
-# RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiar el resto del código fuente
-# COPY . .
+COPY . .
 
 ENV PYTHONUNBUFFERED=1
 
-# Comando de inicio (ajuste según la implementación real)
-# CMD ["python", "monitor.py"]
+EXPOSE 8080
+
+CMD ["python", "main.py"]
