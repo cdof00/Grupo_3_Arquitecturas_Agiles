@@ -22,6 +22,9 @@ services:
       - kafka
     networks:
       - travel-hub-net
+    ports:
+      - "8001:8001"
+      - "8002:8002"
 
   payments:
     build: ./payments
@@ -59,6 +62,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     networks:
       - travel-hub-net
+    # No override del comando por defecto, para evitar problemas con kafka-topics.sh
 
   nginx:
     image: nginx:1.25
@@ -82,6 +86,70 @@ services:
       - "8081:8080"
     networks:
       - travel-hub-net
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8082:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - travel-hub-net
+
+  kafka-init:
+    image: confluentinc/cp-kafka:7.5.0
+    depends_on:
+      - kafka
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        sleep 20
+        /usr/bin/kafka-topics --create --if-not-exists --topic RESERVAS --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1
+        /usr/bin/kafka-topics --create --if-not-exists --topic PAYMENTS --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1
+    networks:
+      - travel-hub-net
+
+  locust:
+    image: locustio/locust:2.24.0
+    container_name: locust
+    volumes:
+      - ./locust:/mnt/locust
+    working_dir: /mnt/locust
+    command: >
+      -f locustfile.py
+      --host=http://api-gateway:80
+    ports:
+      - "8089:8089"
+    networks:
+      - travel-hub-net
+    depends_on:
+      - nginx
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "9090:9090"
+    networks:
+      - travel-hub-net
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - travel-hub-net
+    depends_on:
+      - prometheus
 
 networks:
   travel-hub-net:
