@@ -4,7 +4,9 @@ Este es un proyecto de experimentación para evaluar decisiones de diseño orien
 
 ## Descripción del Experimento
 
-El objetivo de este experimento es verificar la hipótesis de que la aplicación de tácticas de diseño como **monitoreo (detección de errores)** y **voting (enmascaramiento de errores)** favorecen la disponibilidad funcional del sistema. Se busca observar cómo la arquitectura y los mecanismos de monitoreo permiten detectar y enmascarar fallos, mejorando la resiliencia y la continuidad operativa de los servicios.
+El objetivo de este experimento es verificar la hipótesis de que la aplicación de tácticas de diseño como **monitoreo (detección de errores)** y **voting (enmascaramiento de errores)** favorecen la disponibilidad funcional del sistema. Se busca observar cómo la arquitectura y los mecanismos de monitoreo permiten detectar y enmascarar fallos, mejorando la resiliencia y la disponibilidad de los servicios.
+
+Hipotesis: Si se implementa una estrategia de voting para los cálculos de facturación sumado a un monitoreo con health checks cada 10 segundos tendremos: 1. Detección de inconsistencias de cálculos en menos de 500ms. 2. No se entregan resultados incorrectos.
 
 ## Estructura del Proyecto
 
@@ -64,9 +66,6 @@ docker-compose down
 ---
 
 ## Prometheus
-
-El sistema expone métricas clave de resiliencia y voting en el microservicio de billing, que pueden ser consultadas y visualizadas en Prometheus y Grafana.
-
 ### Queries útiles para el experimento
 
 - **Cantidad de inconsistencias detectadas (discrepancia entre estrategias):**
@@ -89,15 +88,3 @@ El sistema expone métricas clave de resiliencia y voting en el microservicio de
   ```
   histogram_quantile(0.95, sum(rate(voting_detection_duration_seconds_bucket[5m])) by (le))
   ```
-
-### Visualización en Grafana
-
-1. Accede a Grafana en [http://localhost:3000](http://localhost:3000) (usuario/contraseña: admin/admin).
-2. Agrega Prometheus como datasource (URL: `http://prometheus:9090`).
-3. Crea un nuevo dashboard y agrega paneles con las queries anteriores:
-   - Panel de barras: inconsistencias detectadas, enmascaradas, no enmascaradas.
-   - Panel de gauge: porcentaje de enmascaramiento exitoso.
-   - Panel de línea: latencia de detección (percentil 95 y promedio).
-4. Ajusta el rango de tiempo y los intervalos según la carga del experimento.
-
-Estas métricas y visualizaciones te permitirán validar cuantitativamente la hipótesis experimental sobre resiliencia y enmascaramiento de fallas en el sistema.
