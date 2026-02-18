@@ -10,9 +10,3 @@ Aquí se deben ubicar los archivos de configuración necesarios para la operaci�
 - Configuración de mensajería (por ejemplo, parámetros de conexión a Kafka, nombres de topics)
 - Variables de entorno y archivos de configuración (por ejemplo, `.env`, `config.yaml`, `settings.json`)
 - Configuración de logging, monitoreo, etc.
-
-## Contenido
-
-- `database.yaml` o `database.env`: Configuración de base de datos.
-- `kafka.yaml` o `kafka.env`: Configuración de Kafka.
-- `app.env`: Variables de entorno generales.

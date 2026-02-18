@@ -60,3 +60,44 @@ Para detener y eliminar los contenedores, ejecute:
 ```bash
 docker-compose down
 ```
+
+---
+
+## Prometheus
+
+El sistema expone métricas clave de resiliencia y voting en el microservicio de billing, que pueden ser consultadas y visualizadas en Prometheus y Grafana.
+
+### Queries útiles para el experimento
+
+- **Cantidad de inconsistencias detectadas (discrepancia entre estrategias):**
+  ```
+  voting_inconsistencies_detected
+  ```
+- **Cantidad de inconsistencias enmascaradas exitosamente (voting 2 de 3):**
+  ```
+  voting_inconsistencies_masked
+  ```
+- **Cantidad de inconsistencias no enmascaradas (fallback, los 3 difieren):**
+  ```
+  voting_inconsistencies_unmasked
+  ```
+- **Porcentaje de enmascaramiento exitoso:**
+  ```
+  (voting_inconsistencies_masked / voting_inconsistencies_detected) * 100
+  ```
+- **Latencia de detección/enmascaramiento (percentil 95):**
+  ```
+  histogram_quantile(0.95, sum(rate(voting_detection_duration_seconds_bucket[5m])) by (le))
+  ```
+
+### Visualización en Grafana
+
+1. Accede a Grafana en [http://localhost:3000](http://localhost:3000) (usuario/contraseña: admin/admin).
+2. Agrega Prometheus como datasource (URL: `http://prometheus:9090`).
+3. Crea un nuevo dashboard y agrega paneles con las queries anteriores:
+   - Panel de barras: inconsistencias detectadas, enmascaradas, no enmascaradas.
+   - Panel de gauge: porcentaje de enmascaramiento exitoso.
+   - Panel de línea: latencia de detección (percentil 95 y promedio).
+4. Ajusta el rango de tiempo y los intervalos según la carga del experimento.
+
+Estas métricas y visualizaciones te permitirán validar cuantitativamente la hipótesis experimental sobre resiliencia y enmascaramiento de fallas en el sistema.
