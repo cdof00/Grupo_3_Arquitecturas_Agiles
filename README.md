@@ -49,11 +49,6 @@ Una vez los contenedores estén en ejecución, puede verificar el estado de cada
 - [http://localhost:8080/payments/health](http://localhost:8080/payments/health)
 - [http://localhost:8080/health](http://localhost:8080/health) (API Gateway)
 
-Cada uno debe responder con:
-
-```json
-{"status": "ok"}
-```
 
 ### 4. Detener los servicios
 
